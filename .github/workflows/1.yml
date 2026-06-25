@@ -15,6 +15,13 @@ on:
         required: true
         type: boolean
         default: false
+  push:
+    paths:
+      - "src/**"
+      - "**.js"
+      - "!docs/**"
+    paths-ignore:
+      - '**.md'
     
 jobs:
   test:
