@@ -41,11 +41,14 @@ jobs:
   
   build:
     needs: lint
-    timeout-minutes: 30  # Job fails if it runs longer than 30 minutes
+    timeout-minutes: 2  # Job fails if it runs longer than 2 minutes
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Building..."
-        timeout-minutes: 10  # Step fails if it runs longer than 10 minutes
+      - name: "..." 
+        timeout-minutes: 1  # Step fails if it runs longer than 1 minutes
+        run: |
+          echo "Building..."
+          sleep 120s
   
   test:
     needs: build
