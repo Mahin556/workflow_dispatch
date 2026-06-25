@@ -19,9 +19,9 @@ on:
     paths:
       - "src/**"
       - "**/*.js"
-    paths-ignore:
-      - '**/*.md'
-      - "docs/**"
+      - '!**/*.md'
+    # paths-ignore:
+    #   - "docs/**"
     
 jobs:
   test:
