@@ -33,6 +33,7 @@ on:
 jobs:
   test:
     runs-on: ${{ matrix.os }}
+    fail-fast: false  # Continue running other matrix jobs even if one fails
     strategy:
       matrix:
         os:
