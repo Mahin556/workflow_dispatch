@@ -18,9 +18,9 @@ on:
   push:
     paths:
       - "src/**"
-      - "**.js"
-      - "!docs/**"
+      - "**/*.js"
     paths-ignore:
+      - "docs/**"
       - '**.md'
     
 jobs:
