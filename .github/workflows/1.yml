@@ -20,6 +20,12 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Test Job"
+      - run: echo "Test Job
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to ${{ inputs.environment }}
+        run: echo "Deploying to ${{ inputs.environment }}"
+        
 
     
