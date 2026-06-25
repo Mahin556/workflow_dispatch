@@ -39,7 +39,7 @@ jobs:
           API_KEY: ${{ secrets.API_KEY }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         run: |
-          echo "API Key is safe
+          echo "API Key is safe"
           deploy.sh
       - name: Use org secret
         env:
