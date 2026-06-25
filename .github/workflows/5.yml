@@ -1,0 +1,43 @@
+name: workflow_dispatch_5
+
+on: 
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to deploy to"
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+      debug:
+        description: "Enable debug mode"
+        required: true
+        type: boolean
+        default: false
+  push:
+    paths:
+      - "src/**"
+      - "**/*.js"
+      - '!**/*.md'
+    # paths-ignore:
+    #   - "docs/**"
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  schedule:
+    - cron: "0 0 * * 0"
+    
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to server
+        env: 
+          API_KEY: ${{ secrets.API_KEY }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          echo "API Key is safe
+          deploy.sh
