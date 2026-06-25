@@ -1,0 +1,48 @@
+name: workflow_dispatch 
+
+on: 
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to deploy to"
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+      debug:
+        description: "Enable debug mode"
+        required: true
+        type: boolean
+        default: false
+  push:
+    paths:
+      - "src/**"
+      - "**/*.js"
+      - '!**/*.md'
+    # paths-ignore:
+    #   - "docs/**"
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  schedule:
+    - cron: "0 0 * * 0"
+    
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+        node-version: [14, 16, 18]
+    steps:
+      - name: "Testing..."
+        run: echo "Testing the application"
+      
+        
+      
