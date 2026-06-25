@@ -33,14 +33,22 @@ on:
 jobs:
   test:
     runs-on: ${{ matrix.os }}
-    fail-fast: false  # Continue running other matrix jobs even if one fails
     strategy:
+      fail-fast: false  # Continue running other matrix jobs even if one fails
       matrix:
         os:
           - ubuntu-latest
           - windows-latest
           - macos-latest
         node-version: [14, 16, 18]
+        include:
+          # Add specific combinations
+          - os: ubuntu-latest
+            node: 18
+            experimental: true
+        exclude:
+          - os: windows-latest
+            node: 14
     steps:
       - name: "Testing..."
         run: echo "Testing the application"
