@@ -44,4 +44,5 @@ jobs:
       - name: Use org secret
         env:
           ORG_TOKEN: ${{ secrets.ORG_TOKEN }}
+          ORG_VAR: ${{ secrets.ORG_VAR }}
         run: echo "Using organization-level secret"
