@@ -1,0 +1,125 @@
+name: Complete CI Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ── These five jobs are independent — they all start at the same time ──
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Run ESLint
+        run: npm run lint
+      - name: Run Prettier check
+        run: npx prettier --check .
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm test
+      - name: Upload test results
+        if: always()                  # preserve results even when tests fail, for debugging
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test-results/
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run test:coverage
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage/lcov.info
+          fail_ci_if_error: true
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm audit
+      - name: Run Snyk security scan
+        # Pin to a specific commit SHA rather than a version tag or @master —
+        # check https://github.com/snyk/actions/releases for the current SHA to pin.
+        uses: snyk/actions/node@<PIN-TO-COMMIT-SHA>
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: SonarCloud Scan
+        # Same here — pin to a commit SHA, not @master.
+        # Check https://github.com/SonarSource/sonarcloud-github-action/commits for the latest trusted SHA.
+        uses: SonarSource/sonarcloud-github-action@<PIN-TO-COMMIT-SHA>
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  # ── These two only run once lint AND test both pass — the "ship gate" ──
+
+  build:
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Build application
+        run: npm run build
+      - name: Upload build
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-build
+          path: dist/
+
+  docker:
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: myapp:${{ github.sha }},myapp:latest
+          cache-from: type=registry,ref=myapp:buildcache
+          cache-to: type=registry,ref=myapp:buildcache,mode=max
