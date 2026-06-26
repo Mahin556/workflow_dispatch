@@ -58,4 +58,6 @@ jobs:
       
       - run: ls -la ./dist
       
+      - run: chmod +x ./dist/deploy.sh
+      
       - run: ./dist/deploy.sh
